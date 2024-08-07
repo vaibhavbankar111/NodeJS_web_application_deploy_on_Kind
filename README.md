@@ -258,7 +258,7 @@ pipeline{
         }
         stage('Checkout from Git'){
             steps{
-                git branch: 'main', url: 'https://github.com/vaibankar/pk_myntra.git'
+                git branch: 'main', url: 'https://github.com/vaibhavbankar111/NodeJS_web_application_deploy_on_Kind.git'
             }
         }
         stage("Sonarqube Analysis "){
