@@ -244,7 +244,7 @@ pipeline{
     environment {
         SCANNER_HOME=tool 'sonar-scanner'
         DOCKER_IMAGE = "myntra" // Define your Docker image name here
-        DOCKER_REGISTRY = "vaibhavbankar" // Define your Docker registry here
+        DOCKER_REGISTRY = <your_Docker_registory_name> // Define your Docker registry here
         DOCKER_CREDENTIALS_ID = "docker" // Replace with your actual credentials ID
         MANIFEST_FILE = "deployment-service.yml" // Path to your manifest file
         GIT_REPO_NAME = "pk_myntra"
