@@ -25,6 +25,10 @@ Tools Required:
    - Prometheus
    - Grafana
 
+### Launch EC2 (Ubuntu 22.04):
+- Create EC2 Instance on AWS
+- Connect to the instance using SSH.
+
 ### Configuring Jenkins server
 
 Pre-Requisites:
@@ -45,17 +49,23 @@ Install Jenkins
 
 ```
 sudo wget -O /usr/share/keyrings/jenkins-keyring.asc \
-  https://pkg.jenkins.io/debian-stable/jenkins.io-2023.key
+https://pkg.jenkins.io/debian-stable/jenkins.io-2023.key
+```
+
+```
 echo "deb [signed-by=/usr/share/keyrings/jenkins-keyring.asc]" \
-  https://pkg.jenkins.io/debian-stable binary/ | sudo tee \
-  /etc/apt/sources.list.d/jenkins.list > /dev/null
+https://pkg.jenkins.io/debian-stable binary/ | sudo tee \
+/etc/apt/sources.list.d/jenkins.list > /dev/null
+```
+
+```
 sudo apt-get update
 sudo apt-get install jenkins
 sudo systemctl enable jenkins
 sudo systemctl start jenkins
 ```
 
-Install NodeJS
+Install NodeJS-16
 
 ```shell
 curl -sL https://deb.nodesource.com/setup_16.x | sudo bash -
@@ -82,23 +92,15 @@ After you login to Jenkins,
       - Run the command to copy the Jenkins Admin Password - `sudo cat /var/lib/jenkins/secrets/initialAdminPassword`
       - Enter the Administrator password
       
-<img width="1291" alt="Screenshot 2023-02-01 at 10 56 25 AM" src="https://user-images.githubusercontent.com/43399466/215959008-3ebca431-1f14-4d81-9f12-6bb232bfbee3.png">
+<img width="1291" src="https://user-images.githubusercontent.com/43399466/215959008-3ebca431-1f14-4d81-9f12-6bb232bfbee3.png">
 
 Click on Install suggested plugins
 
-<img width="1291" alt="Screenshot 2023-02-01 at 10 58 40 AM" src="https://user-images.githubusercontent.com/43399466/215959294-047eadef-7e64-4795-bd3b-b1efb0375988.png">
-
 Wait for the Jenkins to Install suggested plugins
-
-<img width="1291" alt="Screenshot 2023-02-01 at 10 59 31 AM" src="https://user-images.githubusercontent.com/43399466/215959398-344b5721-28ec-47a5-8908-b698e435608d.png">
-
-Create First Admin User or Skip the step [If you want to use this Jenkins instance for future use-cases as well, better to create admin user]
-
-<img width="990" alt="Screenshot 2023-02-01 at 11 02 09 AM" src="https://user-images.githubusercontent.com/43399466/215959757-403246c8-e739-4103-9265-6bdab418013e.png">
 
 Jenkins Installation is Successful. You can now starting using the Jenkins 
 
-<img width="990" alt="Screenshot 2023-02-01 at 11 14 13 AM" src="https://user-images.githubusercontent.com/43399466/215961440-3f13f82b-61a2-4117-88bc-0da265a67fa7.png">
+<img width="990" src="https://user-images.githubusercontent.com/43399466/215961440-3f13f82b-61a2-4117-88bc-0da265a67fa7.png">
 
 Install the Required plugins in Jenkins
 
@@ -111,7 +113,7 @@ Install the Required plugins in Jenkins
    - Select the plugins and click the Install button.
    - Restart Jenkins after the plugin is installed. `http://<ec2-instance-public-ip-address>:8080/restart`
    
-<img width="1392" alt="Screenshot 2023-02-01 at 12 17 02 PM" src="https://user-images.githubusercontent.com/43399466/215973898-7c366525-15db-4876-bd71-49522ecb267d.png">
+<img width="1392" src="https://user-images.githubusercontent.com/43399466/215973898-7c366525-15db-4876-bd71-49522ecb267d.png">
 
 Wait for the Jenkins to be restarted.
 
@@ -186,17 +188,12 @@ http://<ec2-instance-public-ip>:8080/restart
 
 Hurray !! Now you can access the `SonarQube Server` on `http://<ec2-instance-public-ip-address>:9000` 
    
-![Screenshot (199)](https://user-images.githubusercontent.com/129657174/230658262-0a0c8d3a-312d-4423-84e5-a7a1efa9fc68.png)
+![Screenshot ](https://user-images.githubusercontent.com/129657174/230658262-0a0c8d3a-312d-4423-84e5-a7a1efa9fc68.png)
 
 Login using username: admin, Passsword: admin and Change the password
    
-![Screenshot (200)](https://user-images.githubusercontent.com/129657174/230658269-22ebd5d8-3f97-4a47-8155-57236a95b055.png)
-
 Now at the right top corner click profile icon ->  My Account -> Security, Under Generate Token give a name and click Generate and copy the Token.
    
-![Screenshot (201)](https://user-images.githubusercontent.com/129657174/230658498-75e5a06e-512e-4665-bd81-68d7a87d3469.png)
-![Screenshot (202)](https://user-images.githubusercontent.com/129657174/230658495-a4ee14e9-df19-4bfa-8cec-0b9ccc3abb76.png)
-
 
 ### Configuring Credentials on Jenkins
 
@@ -235,7 +232,100 @@ To scan image using trivy:
 ```
 trivy image <imageid>
 ```
+- Jenkins Pipeline
 
+```groovy
+pipeline{
+    agent any
+    tools{
+        jdk 'jdk17'
+        nodejs 'node16'
+    }
+    environment {
+        SCANNER_HOME=tool 'sonar-scanner'
+        DOCKER_IMAGE = "myntra" // Define your Docker image name here
+        DOCKER_REGISTRY = "vaibhavbankar" // Define your Docker registry here
+        DOCKER_CREDENTIALS_ID = "docker" // Replace with your actual credentials ID
+        MANIFEST_FILE = "deployment-service.yml" // Path to your manifest file
+        GIT_REPO_NAME = "pk_myntra"
+        GIT_USER_NAME = "vaibankar"
+    }
+    stages {
+        stage('clean workspace'){
+            steps{
+                cleanWs()
+            }
+        }
+        stage('Checkout from Git'){
+            steps{
+                git branch: 'main', url: 'https://github.com/vaibankar/pk_myntra.git'
+            }
+        }
+        stage("Sonarqube Analysis "){
+            steps{
+                withSonarQubeEnv('sonar-server') {
+                    sh ''' $SCANNER_HOME/bin/sonar-scanner -Dsonar.projectName=Myntra \
+                    -Dsonar.projectKey=Myntra '''
+                }
+            }
+        }
+        stage("quality gate"){
+           steps {
+                script {
+                    waitForQualityGate abortPipeline: false, credentialsId: 'Sonar-token' 
+                }
+            } 
+        }
+        stage('Install Dependencies') {
+            steps {
+                sh "npm install"
+            }
+        }
+        stage('Build Docker Image') {
+            steps {
+                script {
+                    def imageTag = "${DOCKER_IMAGE}:${BUILD_NUMBER}"
+                    sh """
+                    docker build -t ${imageTag} .
+                    """
+                }
+            }
+        }
+        stage('Push Docker Image') {
+            steps {
+                script {
+                    def imageTag = "${DOCKER_IMAGE}:${BUILD_NUMBER}"
+                    def registryImageTag = "${DOCKER_REGISTRY}/${imageTag}"
+                    withDockerRegistry(credentialsId: 'docker', toolName: 'docker'){
+                        sh """
+                        docker tag ${imageTag} ${registryImageTag}
+                        docker push ${registryImageTag}
+                        """
+                    }
+                }
+            }
+        }
+        stage('Update Manifest File') {
+            steps {
+                script {
+                    def newTag = "${DOCKER_REGISTRY}/${DOCKER_IMAGE}:${BUILD_NUMBER}"
+                    withCredentials([string(credentialsId: 'github', variable: 'GITHUB_TOKEN')]) {
+                    sh """
+                    git config user.email "vaibhavmbankar111@gmail.com"
+                    git config user.name "vaibankar"
+                    BUILD_NUMBER=${BUILD_NUMBER}
+                    sed -i 's|image: .*|image: ${newTag}|g' ${MANIFEST_FILE}
+                    git add deployment-service.yml
+                    git commit -m "Update deployment image to version ${BUILD_NUMBER}"
+                    git push https://${GITHUB_TOKEN}@github.com/${GIT_USER_NAME}/${GIT_REPO_NAME} HEAD:main
+                    """
+                }
+            }
+        }
+    }
+ }
+}
+```
 
 
 ### Install kubectl:
