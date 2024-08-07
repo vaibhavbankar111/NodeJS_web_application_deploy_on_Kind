@@ -311,8 +311,8 @@ pipeline{
                     def newTag = "${DOCKER_REGISTRY}/${DOCKER_IMAGE}:${BUILD_NUMBER}"
                     withCredentials([string(credentialsId: 'github', variable: 'GITHUB_TOKEN')]) {
                     sh """
-                    git config user.email "vaibhavmbankar111@gmail.com"
-                    git config user.name "vaibankar"
+                    git config user.email "<Your_github_mail_id>"
+                    git config user.name "<Your_github_username>"
                     BUILD_NUMBER=${BUILD_NUMBER}
                     sed -i 's|image: .*|image: ${newTag}|g' ${MANIFEST_FILE}
                     git add deployment-service.yml
