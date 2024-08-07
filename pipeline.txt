@@ -1,1 +1,90 @@
-
+pipeline{
+    agent any
+    tools{
+        jdk 'jdk17'
+        nodejs 'node16'
+    }
+    environment {
+        SCANNER_HOME=tool 'sonar-scanner'
+        DOCKER_IMAGE = "myntra" // Define your Docker image name here
+        DOCKER_REGISTRY = <your_Docker_registory_name> // Define your Docker registry here
+        DOCKER_CREDENTIALS_ID = "docker" // Replace with your actual credentials ID
+        MANIFEST_FILE = "deployment-service.yml" // Path to your manifest file
+        GIT_REPO_NAME = "NodeJS_web_application_deploy_on_Kind"
+        GIT_USER_NAME = "vaibhavbankar111"
+    }
+    stages {
+        stage('clean workspace'){
+            steps{
+                cleanWs()
+            }
+        }
+        stage('Checkout from Git'){
+            steps{
+                git branch: 'main', url: 'https://github.com/vaibhavbankar111/NodeJS_web_application_deploy_on_Kind.git'
+            }
+        }
+        stage("Sonarqube Analysis "){
+            steps{
+                withSonarQubeEnv('sonar-server') {
+                    sh ''' $SCANNER_HOME/bin/sonar-scanner -Dsonar.projectName=Myntra \
+                    -Dsonar.projectKey=Myntra '''
+                }
+            }
+        }
+        stage("quality gate"){
+           steps {
+                script {
+                    waitForQualityGate abortPipeline: false, credentialsId: 'Sonar-token' 
+                }
+            } 
+        }
+        stage('Install Dependencies') {
+            steps {
+                sh "npm install"
+            }
+        }
+        stage('Build Docker Image') {
+            steps {
+                script {
+                    def imageTag = "${DOCKER_IMAGE}:${BUILD_NUMBER}"
+                    sh """
+                    docker build -t ${imageTag} .
+                    """
+                }
+            }
+        }
+        stage('Push Docker Image') {
+            steps {
+                script {
+                    def imageTag = "${DOCKER_IMAGE}:${BUILD_NUMBER}"
+                    def registryImageTag = "${DOCKER_REGISTRY}/${imageTag}"
+                    withDockerRegistry(credentialsId: 'docker', toolName: 'docker'){
+                        sh """
+                        docker tag ${imageTag} ${registryImageTag}
+                        docker push ${registryImageTag}
+                        """
+                    }
+                }
+            }
+        }
+        stage('Update Manifest File') {
+            steps {
+                script {
+                    def newTag = "${DOCKER_REGISTRY}/${DOCKER_IMAGE}:${BUILD_NUMBER}"
+                    withCredentials([string(credentialsId: 'github', variable: 'GITHUB_TOKEN')]) {
+                    sh """
+                    git config user.email "<Your_github_mail_id>"
+                    git config user.name "<Your_github_username>"
+                    BUILD_NUMBER=${BUILD_NUMBER}
+                    sed -i 's|image: .*|image: ${newTag}|g' ${MANIFEST_FILE}
+                    git add deployment-service.yml
+                    git commit -m "Update deployment image to version ${BUILD_NUMBER}"
+                    git push https://${GITHUB_TOKEN}@github.com/${GIT_USER_NAME}/${GIT_REPO_NAME} HEAD:main
+                    """
+                }
+            }
+        }
+    }
+ }
+}
