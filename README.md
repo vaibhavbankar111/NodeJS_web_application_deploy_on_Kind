@@ -247,8 +247,8 @@ pipeline{
         DOCKER_REGISTRY = <your_Docker_registory_name> // Define your Docker registry here
         DOCKER_CREDENTIALS_ID = "docker" // Replace with your actual credentials ID
         MANIFEST_FILE = "deployment-service.yml" // Path to your manifest file
-        GIT_REPO_NAME = "pk_myntra"
-        GIT_USER_NAME = "vaibankar"
+        GIT_REPO_NAME = "NodeJS_web_application_deploy_on_Kind"
+        GIT_USER_NAME = "vaibhavbankar111"
     }
     stages {
         stage('clean workspace'){
