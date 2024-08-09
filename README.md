@@ -473,7 +473,7 @@ Click on ``CREATE APPLICATION``
    
 ![Screenshot ](https://i.imgur.com/t31vqVp.png)
 
-![Screenshot ](https://i.imgur.com/AQ0sFiS.png)
+![Screenshot ](https://i.imgur.com/ZUS92Te.png)
    
 ![Screenshot ](https://i.imgur.com/NTMNyuN.png)
    
