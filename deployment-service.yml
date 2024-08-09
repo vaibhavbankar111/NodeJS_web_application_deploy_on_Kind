@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
       - name: myntra
-        image: vaibhavbankar/myntra:<replaceImageTag>
+        image: vaibhavbankar/myntra:7
         ports:
         - containerPort: 3000   # Use port 3000
 
