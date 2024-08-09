@@ -242,7 +242,7 @@ pipeline{
     environment {
         SCANNER_HOME=tool 'sonar-scanner'
         DOCKER_IMAGE = "myntra" // Define your Docker image name here
-        DOCKER_REGISTRY = <your_Docker_registory_name> // Define your Docker registry here
+        DOCKER_REGISTRY = "vaibhavbankar" // Define your Docker registry here
         DOCKER_CREDENTIALS_ID = "docker" // Replace with your actual credentials ID
         MANIFEST_FILE = "deployment-service.yml" // Path to your manifest file
         GIT_REPO_NAME = "NodeJS_web_application_deploy_on_Kind"
@@ -303,14 +303,19 @@ pipeline{
                 }
             }
         }
+        stage("TRIVY"){
+            steps{
+                sh "trivy image ${DOCKER_REGISTRY}/${DOCKER_IMAGE}:${BUILD_NUMBER} > trivyimage.txt" 
+            }
+        }
         stage('Update Manifest File') {
             steps {
                 script {
                     def newTag = "${DOCKER_REGISTRY}/${DOCKER_IMAGE}:${BUILD_NUMBER}"
                     withCredentials([string(credentialsId: 'github', variable: 'GITHUB_TOKEN')]) {
                     sh """
-                    git config user.email "<Your_github_mail_id>"
-                    git config user.name "<Your_github_username>"
+                    git config user.email vaibhavb2023@outlook.com
+                    git config user.name vaibhavbankar111
                     BUILD_NUMBER=${BUILD_NUMBER}
                     sed -i 's|image: .*|image: ${newTag}|g' ${MANIFEST_FILE}
                     git add deployment-service.yml
