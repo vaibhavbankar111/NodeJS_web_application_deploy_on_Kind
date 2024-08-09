@@ -20,6 +20,7 @@ Tools Required:
    - Jenkins
    - SonarQube
    - Docker
+   - Trivy
    - Kind
    - ArgoCD
    - Prometheus
