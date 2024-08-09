@@ -479,7 +479,7 @@ Click on ``CREATE APPLICATION``
    
 Now click ``CREATE``
    
-![Screenshot ](https://i.imgur.com/sZvRRas.png)
+![Screenshot ](https://i.imgur.com/SoXj8Fb.png)
 
 
 ### Install Prometheus using Helm:
