@@ -621,3 +621,4 @@ kubectl get secret --namespace default grafana -o jsonpath="{.data.admin-passwor
     - Select the default Prometheus
     - Click on Import
 
+![Screenshot ](https://i.imgur.com/If4sgDx.png)
