@@ -155,13 +155,6 @@ http://<ec2-instance-public-ip>:8080/restart
        ```
        docker run -d --name sonar -p 9000:9000 sonarqube:lts-community
        ```
-
-       To access: 
-        
-        publicIP:9000 (by default username & password is admin)
-        
-        
-        
         
 ### Integrate SonarQube and Configure:
 
