@@ -235,12 +235,12 @@ pipeline{
     }
     environment {
         SCANNER_HOME=tool 'sonar-scanner'
-        DOCKER_IMAGE = <Image_name> // Define your Docker image name here
-        DOCKER_REGISTRY = <Dockerhub_username> // Define your Docker registry here
+        DOCKER_IMAGE = <"Image_name"> // Define your Docker image name here
+        DOCKER_REGISTRY = <"Dockerhub_username"> // Define your Docker registry here
         DOCKER_CREDENTIALS_ID = "docker" // Replace with your actual credentials ID
-        MANIFEST_FILE = <manifest_path> // Path to your manifest file
-        GIT_REPO_NAME = "NodeJS_web_application_deploy_on_Kind"
-        GIT_USER_NAME = "vaibhavbankar111"
+        MANIFEST_FILE = <"manifest_path"> // Path to your manifest file
+        GIT_REPO_NAME = <"github_repo_name">
+        GIT_USER_NAME = <"github_username">
     }
     stages {
         stage('clean workspace'){
