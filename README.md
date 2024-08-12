@@ -308,8 +308,8 @@ pipeline{
                     def newTag = "${DOCKER_REGISTRY}/${DOCKER_IMAGE}:${BUILD_NUMBER}"
                     withCredentials([string(credentialsId: 'github', variable: 'GITHUB_TOKEN')]) {
                     sh """
-                    git config user.email <github_email>
-                    git config user.name <github_username>
+                    git config user.email <"github_email">
+                    git config user.name <"github_username">
                     BUILD_NUMBER=${BUILD_NUMBER}
                     sed -i 's|image: .*|image: ${newTag}|g' ${MANIFEST_FILE}
                     git add <manifest_path>
