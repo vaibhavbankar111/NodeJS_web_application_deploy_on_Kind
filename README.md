@@ -404,7 +404,7 @@ This Operator will be installed in the "operators" namespace and will be usable 
 -  After install, watch your operator come up using next command:
 
 ```
-kubectl get csv -n operators
+kubectl get svc -n operators
 ```
 
 
